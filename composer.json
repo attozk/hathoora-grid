@@ -17,6 +17,5 @@
     },
     "autoload": {
         "psr-0": {"hathoora\\grid": "src/"}
-    },
-    "target-dir": "hathoora/grid/"
+    }
 }
