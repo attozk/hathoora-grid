@@ -1,8 +1,8 @@
 {
-    "name": "hathoora/core",
+    "name": "hathoora/grid",
     "type": "library",
-    "description": "The Hathoora Framework",
-    "keywords": ["framework"],
+    "description": "Hathoora Grid",
+    "keywords": ["grid"],
     "homepage": "http://hathoora.root.pk",
     "license": "MIT",
     "authors": [
