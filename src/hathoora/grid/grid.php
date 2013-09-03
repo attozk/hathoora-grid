@@ -306,33 +306,37 @@ class grid extends container
             $addSelect = ' SELECT ' . $addSelect;
         
         return $select;
-    }    
-    
+    }
+
     /**
      * Builds sql where criteria
      *
      * @param array $arrWhere
+     * @param bool $whereClause when true we will add where clause
      */
-    public static function sqlBuildWhere($arrWhere)
+    public static function sqlBuildWhere($arrWhere, $whereClause = true)
     {
         $where = null;
         if (is_array($arrWhere))
         {
-            $where = ' WHERE 1 ';
+            if ($whereClause)
+                $where = ' WHERE 1 ';
             foreach ($arrWhere as $f => $v)
             {
-                $where .= ' AND ';
+                if ($where)
+                    $where .= ' AND ';
+
                 $field = $f;
-                
+
                 // special suff?
                 if (preg_match('/^(.+?):(literal|int|string)$/i', $f, $arrMatch))
                 {
                     $type = array_pop($arrMatch);
                     $f =  self::getDSN()->escape(array_pop($arrMatch));
-                    
+
                     // literal - becareful with these!!!!
                     if ($type == 'literal')
-                    {   
+                    {
                         // make sure this literal was not passed in the URL (GET!!)
                         if (!empty($_GET['where'][$field]))
                             unset($_GET['where'][$field]);
@@ -348,17 +352,17 @@ class grid extends container
                     else if ($type == 'string')
                         $where .= $f . self::sqlWhereSmartLike($v);
 
-                    else 
-                        $where .= $f .' = "'. self::getDSN()->escape($v) .'" ';                        
+                    else
+                        $where .= $f .' = "'. self::getDSN()->escape($v) .'" ';
                 }
-                else 
+                else
                     $where .= $f .' = "' . self::getDSN()->escape($v) . '" ';
             }
         }
-        
+
         return $where;
     }
-    
+
     /**
      * Replaces \* with %
      * Would return ' LIKE "%when $v has wildcard" '
