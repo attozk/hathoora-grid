@@ -17,7 +17,7 @@ class grid extends container
     {
         $table_id = isset($arrGridData['table']['id']) ? $arrGridData['table']['id'] : 'htgrid_'. time() . rand(1,99999);
         $table_class = isset($arrGridData['table']['class']) ? $arrGridData['table']['class'] : null;
-        $grid = $noResultsTableClass = $noResultsTableStyle = null;
+        $grid = $noResultsTableClass = $noResultsTableStyle = $hasNoResults = null;
 
         $gridHeader = $gridPager = $gridTable = $gridPager = null;
         $htmlAppend = isset($arrGridData['html']['append']) ? $arrGridData['html']['append'] : null;
