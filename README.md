@@ -1,4 +1,4 @@
-hathoora-grid
-=============
+Hathoora PHP Framrwork
+======================
 
-hathoora grid
+This is part of the framework, visit the main site: http://www.hathoora.org

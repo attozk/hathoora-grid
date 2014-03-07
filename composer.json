@@ -1,9 +1,9 @@
 {
     "name": "hathoora/grid",
     "type": "library",
-    "description": "Hathoora Grid",
+    "description": "Hathoora PHP Framework Grid",
     "keywords": ["grid"],
-    "homepage": "http://hathoora.root.pk",
+    "homepage": "http://hathoora.org",
     "license": "MIT",
     "authors": [
         {
@@ -13,7 +13,9 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "ext-mysqli": "*",
+        "ext-mbstring": "*"
     },
     "autoload": {
         "psr-0": {"hathoora\\grid": "src/"}
