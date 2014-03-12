@@ -1,0 +1,110 @@
+Documentation @todo
+
+javascript
+    gridPluginURL: Url of hathoora grid plugin
+    onGridReadyCallBack: callback function when grid has been loaded
+
+html:
+    append: append HTML to the end of table
+
+Table
+    title: <div class="title"></div>
+    id: DOM ID of table
+    idRow: id of TR, you can use, can use dynamic vars
+    class: HTML TABLE class
+    pagination:
+        When empty, it will use \hathoora\grid\pagination::simple
+        When array, specify your own pagination class format: array('CLASS', 'function') e.g.
+
+        $arrPaginationParams = array(
+                                        'totalPages' => $totalPages,
+                                        'currentPage' => $page,
+                                        'baseURL' => $sortURL,
+                                        'queryString' => queryString);
+        function simple($arrParams = array())
+        {
+        }
+
+    message:
+        <div class="noResults">noResults when no results are displayed</div>
+
+    fields:
+        available: funtion that returns an array of available fields
+        jail: array of fields to jail the user in so they cannot view/search/sort other fields
+        default: array of default fields
+        dynamic: when true user can change fields
+
+    limit:
+        default: number of results to display by default
+        limits: limits drop down
+        max: max a user can query on
+
+    sort:
+        default: default field to sort on..
+        url: url for ajax requests
+
+    order:
+        default: default order, ASC/DESC
+
+    template:
+        file path of template to use,
+        default: \hathoora\grid\template.php
+    options
+        topPager
+        bottomPager
+        noTableHead
+
+
+
+Available Fields:
+    field:
+        Name: for table column, otherwise 'field' is used...
+        classTH: thead th class
+        attrsTH: any thead th attributes..
+        classTD
+        attrsTD
+        sort: when true, field is searchable
+        search: array of what type of search can one perform
+        isColumn: (default: true) to be showed in table
+        dbField: db field to use when field is different  when true we use field = dbfield
+        canDel: true
+        content:
+            could be an array of  function, a lambda function
+            or string
+
+group: to implement for UI dropdown..
+
+search options:
+int:
+    is
+    is not
+    >=
+    <=
+    between
+
+string:
+    contains
+    doesn't contain
+    begins with
+    ends with
+    is
+    is not
+
+
+multiple:
+    is:
+    is not
+multiple checks:
+
+custom:
+
+date:
+    is
+    days ago
+    yesterday
+    this week
+    this month
+    this year
+    >=
+    <=
+    between

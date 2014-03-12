@@ -17,12 +17,15 @@ class grid extends container
     {
         $table_id = isset($arrGridData['table']['id']) ? $arrGridData['table']['id'] : 'htgrid_'. time() . rand(1,99999);
         $table_class = isset($arrGridData['table']['class']) ? $arrGridData['table']['class'] : null;
-        $grid = $noResultsTableClass = $noResultsTableStyle = $hasNoResults = null;
+        $grid = $noResultsTableClass = $hasNoResults = null;
+
+        $hathooraGridJS = '/_assets/_hathoora/hathooraGrid.js';
+        if (!empty($arrGridData['javascript']['gridPluginURL']))
+            $hathooraGridJS = $arrGridData['javascript']['gridPluginURL'];
 
         $gridHeader = $gridPager = $gridTable = $gridPager = null;
         $htmlAppend = isset($arrGridData['html']['append']) ? $arrGridData['html']['append'] : null;
         $table_id = $arrGridData['table']['id'];
-        $asseticVersion = .51;
         $onGridReadyCallBack = !empty($arrGridData['javascript']['onGridReadyCallBack']) ? $arrGridData['javascript']['onGridReadyCallBack'] : 'null';
         
         // pagination?
@@ -33,12 +36,18 @@ class grid extends container
         
         if (isset($arrGridData['table']['template']))
             require($arrGridData['table']['template']);
+        // load default template
+        else
+            require(__DIR__ .'/template.php');
+
+        if (!empty($arrGridData['debug']))
+            $htmlAppend .= '<br/><br/>' . $arrGridData['queryTotal'] . '<br/><br/>' . $arrGridData['queryRow'] . '<br/><pre>'. print_r($arrGridData, true) .'</pre>';
 
         // when not ajax call
-        if (empty($arrGridData['pajax']))
+        if (!container::getRequest()->isAjax())
         {
             $grid = $gridHeader .'
-            <div id="'. $table_id .'_inner" table_id="'. $table_id .'" class="hathooraGrid '. $table_class .' ' .$noResultsTableClass .'" style="'. $noResultsTableStyle .'">
+            <div id="'. $table_id .'_inner" htg-table_id="'. $table_id .'" class="hathooraGrid '. $table_class .' ' .$noResultsTableClass .'">
                 <script type="text/javascript">
                     var hathooraGrid = hathooraGrid || {"tables": {}};
                     $(document).ready(function()
@@ -47,7 +56,7 @@ class grid extends container
                         if (jQuery().hathooraGrid == undefined)
                         {
                             $.ajax({
-                                url: "/media/common/js/plugins/hathooraGrid.js'. ($asseticVersion ? '?' . $asseticVersion : null) .'",
+                                url: "'. $hathooraGridJS .'",
                                 dataType: "script",
                                 async: false,
                                 cache: true,
@@ -56,21 +65,22 @@ class grid extends container
                         }
                         
                         hathooraGrid["tables"]["'.$table_id.'"] = {
-                                                        "id":  "'. $table_id .'",
-                                                        "sort":  "'. $arrGridData['sort'] .'",
-                                                        "order":  "'. $arrGridData['order'] .'",
-                                                        "page": "'. $arrGridData['page'] .'",
-                                                        "url": "' . $arrGridData['table']['sort']['url'] .'",
-                                                        "limit": "'. $arrGridData['limit'] .'",
-                                                        "columns": '. (!empty($arrGridData['table']['columnsJS']) ? json_encode($arrGridData['table']['columnsJS']) : '{}') .'
-                                                        }
-                        
+                                                                    "id":  "'. $table_id .'",
+                                                                    "sort":  "'. $arrGridData['sort'] .'",
+                                                                    "order":  "'. $arrGridData['order'] .'",
+                                                                    "page": "'. $arrGridData['page'] .'",
+                                                                    "url": "' . $arrGridData['table']['sort']['url'] .'",
+                                                                    "limit": "'. $arrGridData['limit'] .'",
+                                                                    "dynamic": "'. (!empty($arrGridData['table']['fields']['dynamic']) ? 1 : 0 ).'",
+                                                                    "columns": '. (!empty($arrGridData['table']['columnsJS']) ? json_encode($arrGridData['table']['columnsJS']) : '{}') .'
+                                                                }
+
                         $("#'. $table_id .'").hathooraGrid({"onReady": '. $onGridReadyCallBack .', "isHackReady": true});
                     });
                 </script>'.
-                (!empty($arrGridData['table']['options']['topPager']) ? '<div class="tablePars tablePager">'. $gridPager .'</div>' : null ) .
+                (!empty($arrGridData['table']['options']['topPager']) ? '<div class="hathooraPreTable">'. $gridPager .'</div>' : null ) .
                 $gridTable . 
-                (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="tableFooter tablePager"> '. $gridPager .'</div>' : null) . 
+                (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
                 $htmlAppend .'
             </div>';
         }
@@ -86,7 +96,7 @@ class grid extends container
                     if (jQuery().hathooraGrid == undefined)
                     {
                         $.ajax({
-                            url: "/media/common/js/plugins/hathooraGrid.js'. ($asseticVersion ? '?' . $asseticVersion : null) .'",
+                            url: "'. $hathooraGridJS .'",
                             dataType: "script",
                             cache: true,
                             async: false,
@@ -101,17 +111,18 @@ class grid extends container
                                                     "page": "'. $arrGridData['page'] .'",
                                                     "url": "' . $arrGridData['table']['sort']['url'] .'",
                                                     "limit": "'. $arrGridData['limit'] .'",
+                                                    "dynamic": "'. (!empty($arrGridData['table']['fields']['dynamic']) ? 1 : 0 ).'",
                                                     "columns": '. json_encode($arrGridData['table']['columnsJS']) .' }
                     
                     $("#'. $table_id .'").hathooraGrid({"onReady": '. $onGridReadyCallBack .'});                                                        
                 });
             </script>'.
-            ( !empty($arrGridData['table']['options']['topPager']) ? '<div class="tablePars tablePager">'. $gridPager .'</div>' : null ) .
+            ( !empty($arrGridData['table']['options']['topPager']) ? '<div class="hathooraPreTable">'. $gridPager .'</div>' : null ) .
             $gridTable .
-            (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="tableFooter tablePager"> '. $gridPager .'</div>' : null) .
+            (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
             $htmlAppend;
         }
-    
+
         return $grid;
     }
 
@@ -193,13 +204,20 @@ class grid extends container
         if ($noSQL != true && $skipTotal == false && $queryTotal)
         {
             if ($queryTotalDebug)
-                echo 'Total Query:<br/>' . nl2br($queryTotal);        
-            $stmt = $dsn->query($queryTotal);
-            if ($stmt && $stmt->rowCount()) 
+                echo 'Total Query:<br/>' . nl2br($queryTotal);
+            try
             {
-                $totalQueryHasResults = true;
-                $row = $stmt->fetchArray();
-                $arrGridData['total'] = array_pop($row);
+                $stmt = $dsn->query($queryTotal);
+                if ($stmt && $stmt->rowCount())
+                {
+                    $totalQueryHasResults = true;
+                    $row = $stmt->fetchArray();
+                    $arrGridData['total'] = array_pop($row);
+                }
+            }
+            catch (\Exception $e)
+            {
+                // fail silently
             }
         }
 
@@ -211,7 +229,7 @@ class grid extends container
             if ($queryRowOuterSelect)
             {
                 // we need to remove a.field from the order, it will messup
-                $orderBy = preg_replace('/ORDER BY \w+\./i', 'ORDER BY ', $orderBy);
+                $orderBy = preg_replace('/ORDER BY (.+?)\./i', 'ORDER BY ', $orderBy);
                 
                 $query = 'SELECT o.*  FROM ( '. $queryRow .') o '. $orderBy .' '. $limitClause;
             }
@@ -220,47 +238,54 @@ class grid extends container
             
             if ($queryRowDebug)
                 echo 'Row Query:<br/>' . nl2br($query);
-            
-            $stmt = $dsn->query($query);
-            if ($stmt && $stmt->rowCount()) 
-            {
-                while ($row = $stmt->fetchArray())
-                {
-                    // any row functions
-                    if (is_array($rowFunctions))
-                    {
-                        foreach ($rowFunctions as $rowFunction)
-                        {
-                            if (is_callable($rowFunction))
-                                call_user_func_array($rowFunction, array(&$row));
-                        }
-                    }
-                    
-                    if ($primaryKey && isset($row[$primaryKey]))
-                        $arrGridData['rows'][$row[$primaryKey]] = $row;
-                    else
-                        $arrGridData['rows'][] = $row;
-                }
-                
-                // any data functions
-                if (is_array($dataFunctions))
-                {
-                    foreach($dataFunctions as $dataFunction)
-                    {
-                        $arrDataFunctionExtraParams = null;
-                        if (count($dataFunction) > 2)
-                            $arrDataFunctionExtraParams = array_pop($dataFunction);
-                        if (is_callable($dataFunction))
-                        {
-                            $args = array();
-                            $args[0] =& $arrGridData['rows'];
-                            if (is_array($arrDataFunctionExtraParams))
-                                $args = array_merge($args, $arrDataFunctionExtraParams);
 
-                            call_user_func_array($dataFunction, $args);
+            try
+            {
+                $stmt = $dsn->query($query);
+                if ($stmt && $stmt->rowCount())
+                {
+                    while ($row = $stmt->fetchArray())
+                    {
+                        // any row functions
+                        if (is_array($rowFunctions))
+                        {
+                            foreach ($rowFunctions as $rowFunction)
+                            {
+                                if (is_callable($rowFunction))
+                                    call_user_func_array($rowFunction, array(&$row));
+                            }
+                        }
+
+                        if ($primaryKey && isset($row[$primaryKey]))
+                            $arrGridData['rows'][$row[$primaryKey]] = $row;
+                        else
+                            $arrGridData['rows'][] = $row;
+                    }
+
+                    // any data functions
+                    if (is_array($dataFunctions))
+                    {
+                        foreach($dataFunctions as $dataFunction)
+                        {
+                            $arrDataFunctionExtraParams = null;
+                            if (count($dataFunction) > 2)
+                                $arrDataFunctionExtraParams = array_pop($dataFunction);
+                            if (is_callable($dataFunction))
+                            {
+                                $args = array();
+                                $args[0] =& $arrGridData['rows'];
+                                if (is_array($arrDataFunctionExtraParams))
+                                    $args = array_merge($args, $arrDataFunctionExtraParams);
+
+                                call_user_func_array($dataFunction, $args);
+                            }
                         }
                     }
-                }                        
+                }
+            }
+            catch (\Exception $e)
+            {
+                // fail silently
             }
         }
 
@@ -540,14 +565,14 @@ class grid extends container
                     // default columns specified
                     else if (!empty($arrGridPrepare['table']['fields']['default']) && count($arrGridPrepare['table']['fields']['default']))
                         $arrColumnsPossible = $arrGridPrepare['table']['fields']['default'];
-                    
+
                     // if still not able to figure out possible columns then use $arrFields
                     if (empty($arrColumnsPossible) || !count($arrColumnsPossible))
                     {
                         $arrColumnsPossible = $arrFields;
                         $arrColumnsPossibleType = 'associative';
                     }
-                        
+
                     #3c now figure out among the possible columns which ones are actually defined and can be used
                     if (is_array($arrColumnsPossible))
                     {
@@ -556,18 +581,36 @@ class grid extends container
                             // be careful because can have associative or indexed array based on how it was prepared
                             if ($arrColumnsPossibleType == 'indexed')
                                 $field = $vfield;
-                            
+
                             if (isset($arrFields[$field]) && is_array($arrFields[$field]))
                             {
                                 $arrField =& $arrFields[$field];
                                 
                                 // name of the field?
-                                $arrField['name'] = self::cleanString(!empty($arrField['name']) ? $arrField['name'] : $field);
-                                
+                                if (!empty($arrField['name']))
+                                {
+                                    $cleanName = self::cleanString($arrField['name']);
+                                    if ($cleanName)
+                                        $arrField['name'] = $cleanName;
+                                }
+
+                                if (!$arrField['name'])
+                                    $arrField['name'] = $field;
+
+                                if (!array_key_exists('canDel', $arrField))
+                                    $arrField['canDel'] = true;
+
+                                // set the default value of dbField
+                                if (!array_key_exists('dbField', $arrField))
+                                    $arrField['dbField'] = $field;
+
                                 // any dependencies?
                                 if (isset($arrField['dependency']) && is_array($arrField['dependency']))
                                     self::prepareDependencyHandler('column', $field, $arrField, $arrGridPrepare, $arrFormData);
-                                
+                                if (!empty($arrField['dbField']))
+                                    $arrGridPrepare['selectField'][$arrField['dbField']] = $arrField['dbField'];
+
+
                                 $arrGridPrepare['table']['columns'][$field] =& $arrField;
                                 $arrGridPrepare['table']['columnsJS'][$field] = array(
                                                                                     'field' => $field,
@@ -587,7 +630,12 @@ class grid extends container
             // is the field even marked sortable?
             if (!empty($arrFields[$arrFormData['sort']]['sort']))
             {
-                $arrGridPrepare['sort'] = self::removeNand($arrFormData['sort']);
+                // field has dbField?
+                if (!empty($arrFields[$arrFormData['sort']]['dbField']))
+                    $arrGridPrepare['sort'] = self::removeNand($arrFields[$arrFormData['sort']]['dbField']);
+                else
+                    $arrGridPrepare['sort'] = self::removeNand($arrFormData['sort']);
+
                 if (!empty($arrFormData['order']))
                     $arrGridPrepare['order'] = $arrFormData['order'];
             }
@@ -661,9 +709,20 @@ class grid extends container
         if (empty($arrGridPrepare['table']['sort']['url']))
             $arrGridPrepare['table']['sort']['url'] = $_SERVER['REQUEST_URI'];
 
-        // if its ajax call
-        if (!empty($arrFormData['pajax']))
-            $arrGridPrepare['pajax'] = 1;
+        // cleanup duplicate for duplicate params
+        // @http://stackoverflow.com/questions/2613063/remove-duplicate-from-string-in-php
+        if ($arrGridPrepare['table']['sort']['url'])
+        {
+            $url = parse_url($arrGridPrepare['table']['sort']['url'], PHP_URL_PATH);
+            $params = parse_url($arrGridPrepare['table']['sort']['url'], PHP_URL_QUERY);
+            if ($params)
+            {
+                parse_str($params, $paramsArr);
+                $params = http_build_query($paramsArr);
+            }
+
+            $arrGridPrepare['table']['sort']['url'] = $url . ($params ? '?'. $params : null);
+        }
     }
     
     /**
@@ -694,7 +753,7 @@ class grid extends container
                 $arrGridPrepare['joinTotal'][$f] = $v;
             }
         }
-        
+
         // row joins
         if (isset($arrField['dependency']['joinRow']) && is_array($arrField['dependency']['joinRow']))
         {
@@ -703,6 +762,7 @@ class grid extends container
                 $arrGridPrepare['joinRow'][$f] = $v;
             }
         }
+
         // rowFunctions
         if (isset($arrField['dependency']['rowFunctions']) && is_array($arrField['dependency']['rowFunctions']))
         {
@@ -710,8 +770,26 @@ class grid extends container
             {
                 $arrGridPrepare['rowFunctions'][$f] = $v;
             }
-        }        
-    
+        }
+
+        // total groups
+        if (isset($arrField['dependency']['groupTotal']) && is_array($arrField['dependency']['groupTotal']))
+        {
+            foreach ($arrField['dependency']['groupTotal'] as $f => $v)
+            {
+                $arrGridPrepare['groupTotal'][$f] = $v;
+            }
+        }
+
+        // row groups
+        if (isset($arrField['dependency']['groupRow']) && is_array($arrField['dependency']['groupRow']))
+        {
+            foreach ($arrField['dependency']['groupRow'] as $f => $v)
+            {
+                $arrGridPrepare['groupRow'][$f] = $v;
+            }
+        }
+
         // dataFunctions
         if (isset($arrField['dependency']['dataFunctions']) && is_array($arrField['dependency']['dataFunctions']))
         {
