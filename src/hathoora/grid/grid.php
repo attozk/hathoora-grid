@@ -44,7 +44,7 @@ class grid extends container
             $htmlAppend .= '<br/><br/>' . $arrGridData['queryTotal'] . '<br/><br/>' . $arrGridData['queryRow'] . '<br/><pre>'. print_r($arrGridData, true) .'</pre>';
 
         // when not ajax call
-        if (!container::getRequest()->isAjax())
+        if (empty($arrGridData['pajax']))
         {
             $grid = $gridHeader .'
             <div id="'. $table_id .'_inner" htg-table_id="'. $table_id .'" class="hathooraGrid '. $table_class .' ' .$noResultsTableClass .'">
@@ -594,7 +594,7 @@ class grid extends container
                                         $arrField['name'] = $cleanName;
                                 }
 
-                                if (!$arrField['name'])
+                                if (empty($arrField['name']))
                                     $arrField['name'] = $field;
 
                                 if (!array_key_exists('canDel', $arrField))
