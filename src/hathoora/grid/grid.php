@@ -585,7 +585,7 @@ class grid extends container
                             if (isset($arrFields[$field]) && is_array($arrFields[$field]))
                             {
                                 $arrField =& $arrFields[$field];
-                                
+
                                 // name of the field?
                                 if (!empty($arrField['name']))
                                 {
@@ -618,12 +618,12 @@ class grid extends container
                                                                                     'sort' => isset($arrField['sort']) ? $arrField['sort'] : 0,
                                                                                 );
                             }
-                        }                    
+                        }
                     }
                 }
             }
         }
-        
+
         #4 sort & order
         if (!empty($arrFormData['sort']))
         {
@@ -640,47 +640,62 @@ class grid extends container
                     $arrGridPrepare['order'] = $arrFormData['order'];
             }
         }
-       
+
         // default sort & order
         if (empty($arrGridPrepare['sort']) && !empty($arrGridPrepare['table']['sort']['default']))
             $arrGridPrepare['sort'] = $arrGridPrepare['table']['sort']['default'];
-            
+
         if (empty($arrGridPrepare['order']) && !empty($arrGridPrepare['table']['order']['default']))
             $arrGridPrepare['order'] = $arrGridPrepare['table']['order']['default'];
-            
+
         if (empty($arrGridPrepare['sort']) && !empty($arrGridPrepare['order']))
             $arrGridPrepare['order'] = 'desc';
-            
+
         #5 output
         if (empty($arrGridPrepare['table']['output']) && !empty($arrFormData['output']))
             $arrGridPrepare['table']['output'] = $arrFormData['output'];
         if (empty($arrGridPrepare['table']['output']))
             $arrGridPrepare['table']['output'] = 'html';
 
+        #6a search fields
+        // fields a user can search on
+        $arrSearchableFields = array();
+
+        // get the columns that are searchable, first from the ['table']['column']['fields']
+        if (!empty($arrFields) && is_array($arrFields))
+        {
+            foreach ($arrFields as $_field => $_arrField)
+            {
+                if (!empty($_arrField['search']) && is_array($_arrField['search']))
+                {
+                    if (!empty($_arrField['search']['type']))
+                    {
+                        if (!empty($_arrField['search']['operations']))
+                        {
+                            $_operations = explode(',', $_arrField['search']['operations']);
+                            $_searchArr = array();
+                            foreach($_operations as $_operation)
+                            {
+                                $_operation = trim($_operation);
+                                $_searchArr[$_operation] = $_operation;
+                            }
+
+                            $arrSearchableFields[$_field] = $_searchArr;
+                            $arrGridPrepare['table']['columnsJS'][$field]['search'] = $_searchArr;
+                        }
+                    }
+                }
+            }
+        }
+
         #6 where criteria
         $arrWherePossible = null;
         if (!empty($arrFormData['where']) && is_array($arrFormData['where']))
             $arrWherePossible =& $arrFormData['where'];
-        $arrWhere = array(); // fields that are searched         
-        
-        if (is_array($arrWherePossible))
-        {   
-            // fields a user can search on
-            $arrSearchableFields = array();
-    
-            // get the columns that are searchable, first from the ['table']['column']['fields']
-            if (!empty($arrFields) && is_array($arrFields))
-            {
-                foreach ($arrFields as $field => $arrField)
-                {   
-                    if (!empty($arrField['search']) && is_array($arrField['search']))
-                    {
-                        $arrSearchableFields[$field] = $arrField['search'];
-                        $arrGridPrepare['table']['columnsJS'][$field]['search'] = $arrField['search'];
-                    }
-                }
-            }
-            
+        $arrWhere = array(); // fields that are searched
+
+        if (is_array($arrWherePossible) && count($arrSearchableFields))
+        {
             // loop over where criteria and make sure the fields are searchable so we can prepare where criteria
             foreach($arrWherePossible as $where => $value)
             {   
@@ -723,6 +738,10 @@ class grid extends container
 
             $arrGridPrepare['table']['sort']['url'] = $url . ($params ? '?'. $params : null);
         }
+
+        // ajax requesy?
+        if (!array_key_exists('pajax', $arrGridPrepare) && container::getRequest()->isAjax())
+            $arrGridPrepare['pajax'] = true;
     }
     
     /**
