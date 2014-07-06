@@ -27,7 +27,8 @@ class grid extends container
         $htmlAppend = isset($arrGridData['html']['append']) ? $arrGridData['html']['append'] : null;
         $table_id = $arrGridData['table']['id'];
         $onGridReadyCallBack = !empty($arrGridData['javascript']['onGridReadyCallBack']) ? $arrGridData['javascript']['onGridReadyCallBack'] : 'null';
-        
+        $ajaxCalls = isset($arrGridData['javascript']['ajax']) ? $arrGridData['javascript']['ajax'] : true;
+
         // pagination?
         if (empty($arrGridData['table']['pagination']))
             $arrGridData['table']['pagination'] = array('\hathoora\grid\pagination', 'simple');
@@ -47,8 +48,12 @@ class grid extends container
         if (empty($arrGridData['pajax']))
         {
             $grid = $gridHeader .'
-            <div id="'. $table_id .'_inner" htg-table_id="'. $table_id .'" class="hathooraGrid '. $table_class .' ' .$noResultsTableClass .'">
-                <script type="text/javascript">
+            <div id="'. $table_id .'_inner" htg-table_id="'. $table_id .'" class="hathooraGrid '. $table_class .' ' .$noResultsTableClass .'">';
+
+            if ($ajaxCalls)
+            {
+                $grid .= '
+                 <script type="text/javascript">
                     var hathooraGrid = hathooraGrid || {"tables": {}};
                     $(document).ready(function()
                     {
@@ -77,7 +82,10 @@ class grid extends container
 
                         $("#'. $table_id .'").hathooraGrid({"onReady": '. $onGridReadyCallBack .', "isHackReady": true});
                     });
-                </script>'.
+                </script>';
+            }
+
+            $grid .=
                 (!empty($arrGridData['table']['options']['topPager']) ? '<div class="hathooraPreTable">'. $gridPager .'</div>' : null ) .
                 $gridTable . 
                 (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
@@ -87,36 +95,41 @@ class grid extends container
         // is ajx call
         else
         {
-            $grid = '
-            <script type="text/javascript">
-                var hathooraGrid = hathooraGrid || {"tables": {}};
-                $(document).ready(function()
-                {
-                    // load hathooraGrid if not already loaded
-                    if (jQuery().hathooraGrid == undefined)
+            if ($ajaxCalls)
+            {
+                $grid = '
+                <script type="text/javascript">
+                    var hathooraGrid = hathooraGrid || {"tables": {}};
+                    $(document).ready(function()
                     {
-                        $.ajax({
-                            url: "'. $hathooraGridJS .'",
-                            dataType: "script",
-                            cache: true,
-                            async: false,
-                            success: function(){}
-                        });
-                    }
-                    
-                    hathooraGrid["tables"]["'.$table_id.'"] = {
-                                                    "id":  "'. $table_id .'",
-                                                    "sort":  "'. $arrGridData['sort'] .'",
-                                                    "order":  "'. $arrGridData['order'] .'",
-                                                    "page": "'. $arrGridData['page'] .'",
-                                                    "url": "' . $arrGridData['table']['sort']['url'] .'",
-                                                    "limit": "'. $arrGridData['limit'] .'",
-                                                    "dynamic": "'. (!empty($arrGridData['table']['fields']['dynamic']) ? 1 : 0 ).'",
-                                                    "columns": '. json_encode($arrGridData['table']['columnsJS']) .' }
-                    
-                    $("#'. $table_id .'").hathooraGrid({"onReady": '. $onGridReadyCallBack .'});                                                        
-                });
-            </script>'.
+                        // load hathooraGrid if not already loaded
+                        if (jQuery().hathooraGrid == undefined)
+                        {
+                            $.ajax({
+                                url: "'. $hathooraGridJS .'",
+                                dataType: "script",
+                                cache: true,
+                                async: false,
+                                success: function(){}
+                            });
+                        }
+
+                        hathooraGrid["tables"]["'.$table_id.'"] = {
+                                                        "id":  "'. $table_id .'",
+                                                        "sort":  "'. $arrGridData['sort'] .'",
+                                                        "order":  "'. $arrGridData['order'] .'",
+                                                        "page": "'. $arrGridData['page'] .'",
+                                                        "url": "' . $arrGridData['table']['sort']['url'] .'",
+                                                        "limit": "'. $arrGridData['limit'] .'",
+                                                        "dynamic": "'. (!empty($arrGridData['table']['fields']['dynamic']) ? 1 : 0 ).'",
+                                                        "columns": '. json_encode($arrGridData['table']['columnsJS']) .' }
+
+                        $("#'. $table_id .'").hathooraGrid({"onReady": '. $onGridReadyCallBack .'});
+                    });
+                </script>';
+            }
+
+            $grid .=
             ( !empty($arrGridData['table']['options']['topPager']) ? '<div class="hathooraPreTable">'. $gridPager .'</div>' : null ) .
             $gridTable .
             (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
