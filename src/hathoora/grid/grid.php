@@ -41,6 +41,8 @@ class grid extends container
         else
             require(__DIR__ .'/template.php');
 
+        $gridPager = trim($gridPager);
+
         if (!empty($arrGridData['debug']))
             $htmlAppend .= '<br/><br/>' . $arrGridData['queryTotal'] . '<br/><br/>' . $arrGridData['queryRow'] . '<br/><pre>'. print_r($arrGridData, true) .'</pre>';
 
@@ -88,7 +90,7 @@ class grid extends container
             $grid .=
                 (!empty($arrGridData['table']['options']['topPager']) ? '<div class="hathooraPreTable">'. $gridPager .'</div>' : null ) .
                 $gridTable . 
-                (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
+                (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false && $gridPager) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
                 $htmlAppend .'
             </div>';
         }
@@ -132,7 +134,7 @@ class grid extends container
             $grid .=
             ( !empty($arrGridData['table']['options']['topPager']) ? '<div class="hathooraPreTable">'. $gridPager .'</div>' : null ) .
             $gridTable .
-            (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
+            (!$hasNoResults && (isset($arrGridData['table']['options']['bottomPager']) && $arrGridData['table']['options']['bottomPager'] !== false && $gridPager) ? '<div class="hathooraPostTable"> '. $gridPager .'</div>' : null) .
             $htmlAppend;
         }
 
