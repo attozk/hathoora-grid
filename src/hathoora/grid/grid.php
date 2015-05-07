@@ -604,7 +604,12 @@ class grid extends container
                                 // name of the field?
                                 if (!empty($arrField['name']))
                                 {
-                                    $cleanName = self::cleanString($arrField['name']);
+                                    $cleanName = $arrField['name'];
+
+                                    # @todo only when CSV is output..
+                                    #if ($arrGridPrepare['table']['output'] != 'html')
+                                    #    $cleanName = self::cleanString($arrField['name']);
+
                                     if ($cleanName)
                                         $arrField['name'] = $cleanName;
                                 }
