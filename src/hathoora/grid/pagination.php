@@ -12,9 +12,14 @@ class pagination
         $current_page =  !empty($arrParams['currentPage']) ? $arrParams['currentPage'] : null;
         $base_url =  !empty($arrParams['baseURL']) ? $arrParams['baseURL'] : null;
         $query_str =  !empty($arrParams['queryString']) ? $arrParams['queryString'] : 'page';
-        
+
         $paginate_limit = 10;
-        
+        $query_sep = '?';
+
+        if (strpos($base_url, '?')) {
+            $query_sep = '&';
+        }
+
         // Array to store page link list
         $page_array = array ();
         
@@ -34,7 +39,7 @@ class pagination
               // If it's the current page, leave out the link
               // otherwise set a URL field also
               if ($i != $current_page)
-                  $page_array[$i]['url'] = $base_url . "?" . $query_str . "=" . $i;
+                  $page_array[$i]['url'] = $base_url . $query_sep . $query_str . "=" . $i;
                   
               $page_array[$i]['text'] = strval ($i);
            }
